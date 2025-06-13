@@ -1,0 +1,15 @@
+  .filters-block {
+    max-width: 60%;
+  }
+
+  .money {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvasDiv {
+    height: 350px;
+  }

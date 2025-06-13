@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'dds_app/style/main_page_style.css' %}">
+{% endblock style %}
+
+{% block content %}
+<div class="info-block d-flex">
+  <div class="filters-block me-2 pt-5">
+    <div class="card mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Фильтрация операций</h5>
+      </div>
+      <div class="card-body">
+        <form id="filterForm" method="get" class="row g-3">
+          <!-- Период дат -->
+          <div class="col-md-6">
+            <label for="dateRange" class="form-label">Период</label>
+            <div class="input-group">
+              {{ filter_form.date_from }}
+              <span class="input-group-text">по</span>
+              {{ filter_form.date_to }}
+            </div>
+          </div>
+
+          <!-- Статус -->
+          <div class="col-md-3">
+            <label for="statusFilter" class="form-label">Статус</label>
+            {{ filter_form.status }}
+          </div>
+
+          <!-- Тип операции -->
+          <div class="col-md-3">
+            <label for="operationType" class="form-label">Тип операции</label>
+            {{ filter_form.operation_type }}
+          </div>
+
+          <!-- Категория -->
+          <div class="col-md-4">
+            <label for="categoryFilter" class="form-label">Категория</label>
+            {{ filter_form.category }}
+          </div>
+
+          <!-- Подкатегория -->
+          <div class="col-md-4">
+            <label for="subcategoryFilter" class="form-label">Подкатегория</label>
+            <select class="form-select" id="subcategoryFilter" name="subcategory">
+              {% for el in filter_form.subcategory %}
+                {{ el }}
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="col-md-10 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bi bi-funnel"></i> Применить
+            </button>
+            <button type="reset" class="btn btn-outline-secondary" id="resetFilters">
+              <i class="bi bi-arrow-counterclockwise"></i> Сбросить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="money">
+    <h1>Расходы</h1>
+    <div class="canvasDiv">
+      <canvas id="myChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div id="transactionAddModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div id="form-content" class="modal-content"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header bg-light">
+    <button id="add-transaction" class="btn btn-primary" type="button" name="button">
+      Добавить транзакцию
+    </button>
+  </div>
+  <div class="card-body">
+    {% if transactions %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Дата</th>
+          <th scope="col">Статус</th>
+          <th scope="col">Тип операции</th>
+          <th scope="col">Категория</th>
+          <th scope="col">Подкатегория</th>
+          <th scope="col">Сумма</th>
+          <th scope="col">Комментарий</th>
+        </tr>
+      </thead>
+        <tbody>
+          {% for transaction in transactions %}
+          <tr class="modal-update" data-form-url="{% url 'transaction_add_modal' pk=transaction.pk %}" style="cursor: pointer;">
+            <td>{{ transaction.created_date }}</td>
+            <td>{{ transaction.status }}</td>
+            <td>{{ transaction.operation_type }}</td>
+            <td>{{ transaction.category.name }}</td>
+            <td>{{ transaction.subcategory.name }}</td>
+            <td>{{ transaction.amount }}₽</td>
+            {% if transaction.comment %}
+              <td>{{ transaction.comment }}</td>
+            {% else %}
+              <td>-</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+      <h1 class="text-center mt-5 mb-5">Записей не найдено</h1>
+    {% endif %}
+  </div>
+</div>
+
+<div id="canvas-data">
+  {% for key, value in canvas_data.items %}
+    <div label="{{ key }}" data="{{ value }}"></div>
+  {% endfor %}
+</div>
+{% endblock content %}
+
+{% block script %}
+<script type="text/javascript">
+  let modal = document.getElementById('form-content');
+
+  document.addEventListener("DOMContentLoaded", (e) => {
+    let form = document.getElementById('form-content');
+
+    modalForm(document.getElementById('add-transaction'), {
+      modalID: '#transactionAddModal',
+      formURL: "{% url 'transaction_add_modal' %}"
+    });
+
+    const fetchFunc = function(apiUrl, value, targetId, parentId, childId = null) {
+      fetch(`${apiUrl}?${targetId}=${value}`)
+        .then(response => response.json())
+        .then(data => {
+          const categorySelect = document.getElementById(parentId);
+          categorySelect.innerHTML = data;
+          console.log(data);
+
+          if (childId != null) {
+            const subcategorySelect = document.getElementById(childId);
+            subcategorySelect.innerHTML = '<option value="">---------</option>'
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    const idxs = ['id_operation_type', 'id_status', 'id_subcategory'];
+    document.getElementById('form-content').addEventListener('change', (e) => {
+      const value = e.target.value;
+      if (value) {
+        const apiUrl = e.target.getAttribute('api-url');
+        if (apiUrl === "{% url 'get_categories' %}") {
+          console.log(e.target['id']);
+          fetchFunc(apiUrl, value, e.target['id'] ,'id_category', 'id_subcategory');
+        }
+        else if (apiUrl === "{% url 'get_subcategories' %}") {
+          fetchFunc(apiUrl, value, e.target['id'], 'id_subcategory');
+        }
+      }
+    });
+    
+
+    const updateBtns = document.querySelectorAll('.modal-update');
+    updateBtns.forEach(area => {
+      const formURL = area.dataset['formUrl'];
+      modalForm(area, {
+        modalID: '#transactionAddModal',
+        formURL: formURL
+      });
+    });
+  });
+</script>
+
+<script src="{% static 'dds_app/js/libs/chart.js' %}"></script>
+<script src="{% static 'dds_app/js/chart_script.js' %}"></script>
+{% endblock script %}
