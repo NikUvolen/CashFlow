@@ -1,6 +1,19 @@
 from django.urls import path
 from django.http import JsonResponse
-from .views import MainPageView, TransactionCreateView, TransactionUpdateView
+from .views import (
+    MainPageView, 
+    TransactionCreateView, 
+    TransactionUpdateView,
+    ManagingDirectories,
+    StatusCreateView,
+    StatusUpdateView,
+    TypeCreateView,
+    TypeUpdateView,
+    CategoryCreateView,
+    CategoryUpdateView,
+    SubcategoryCreateView,
+    SubcategoryUpdateView
+)
 from .models import Category, Subcategory
 
 
@@ -25,6 +38,16 @@ urlpatterns = [
     path('', MainPageView.as_view(), name='main_page'),
     path('transactions/create/', TransactionCreateView.as_view(), name='transaction_add_modal'),
     path('transaction/update/<int:pk>', TransactionUpdateView.as_view(), name='transaction_add_modal'),
+    
+    path('managing-directories/', ManagingDirectories.as_view(), name='managing_directories'),
+    path('managing-directories/create/status', StatusCreateView.as_view(), name='md_status_add_modal'),
+    path('managing-directories/update/status/<int:pk>', StatusUpdateView.as_view(), name='md_status_update_modal'),
+    path('managing-directories/create/operation_type', TypeCreateView.as_view(), name='md_type_add_modal'),
+    path('managing-directories/update/operation_type/<int:pk>', TypeUpdateView.as_view(), name='md_type_update_modal'),
+    path('managing-directories/create/category', CategoryCreateView.as_view(), name='md_category_add_modal'),
+    path('managing-directories/update/category/<int:pk>', CategoryUpdateView.as_view(), name='md_category_update_modal'),
+    path('managing-directories/create/subcategory', SubcategoryCreateView.as_view(), name='md_subcategory_add_modal'),
+    path('managing-directories/update/subcategory/<int:pk>', SubcategoryUpdateView.as_view(), name='md_subcategory_update_modal'),
 
     path('api/get_categories/', get_categories, name='get_categories'),
     path('api/get_subcategories/', get_subcategories, name='get_subcategories'),

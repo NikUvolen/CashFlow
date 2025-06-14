@@ -3,13 +3,14 @@ from django.urls import reverse_lazy
 from django.views import View
 from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView
 from .models import *
-from .forms import AddTransactionForm
+from .forms import AddTransactionForm, StatusForm, TypesForm, CategoryForm, SubcategoryForm
 from .filters import TransactionFilter
 
 
+# ---- MAIN PAGE ----
 class TransactionCreateView(BSModalCreateView):
     form_class = AddTransactionForm
-    template_name = 'dds_app/add_transaction_modal_form.html'
+    template_name = 'dds_app/modals/add_transaction_modal.html'
     success_message = 'Success: Book was created.'
     success_url = reverse_lazy('main_page')
 
@@ -25,7 +26,7 @@ class TransactionCreateView(BSModalCreateView):
 
 class TransactionUpdateView(BSModalUpdateView):
     model = Transaction
-    template_name = 'dds_app/update_transaction_modal_form.html'
+    template_name = 'dds_app/modals/update_transaction_modal.html'
     form_class = AddTransactionForm
     success_url = reverse_lazy('main_page')
 
@@ -97,3 +98,102 @@ class MainPageView(View):
             return render(request, 'dds_app/main.html', context=context)
         else:
             return render(request, 'dds_app/welcome_page.html')
+        
+
+# ---- Managing Directories page ---
+# class TransactionCreateView(BSModalCreateView):
+#     form_class = AddTransactionForm
+#     template_name = 'dds_app/add_transaction_modal_form.html'
+#     success_message = 'Success: Book was created.'
+#     success_url = reverse_lazy('main_page')
+
+#     def get_initial(self):
+#         initial = super().get_initial()
+#         initial['created_date'] = timezone.now().date()
+#         return initial
+    
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs['user'] = self.request.user
+#         return kwargs
+    
+class StatusCreateView(BSModalCreateView):
+    form_class = StatusForm
+    template_name = 'dds_app/modals/add_status_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+class StatusUpdateView(BSModalUpdateView):
+    model = Status
+    form_class = StatusForm
+    template_name = 'dds_app/modals/update_status_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+class TypeCreateView(BSModalCreateView):
+    form_class = TypesForm
+    template_name = 'dds_app/modals/add_type_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+class TypeUpdateView(BSModalUpdateView):
+    model = OperationType
+    form_class = TypesForm
+    template_name = 'dds_app/modals/update_type_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+class CategoryCreateView(BSModalCreateView):
+    form_class = CategoryForm
+    template_name = 'dds_app/modals/add_category_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+class CategoryUpdateView(BSModalUpdateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'dds_app/modals/update_category_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+    def form_valid(self, form):
+        transactions = Transaction.objects.filter(category=self.object)
+        for transaction in transactions:
+            transaction.operation_type = self.object.operation_type
+        Transaction.objects.bulk_update(transactions, ['operation_type'])
+
+        response = super().form_valid(form)
+        
+        return response
+
+class SubcategoryCreateView(BSModalCreateView):
+    form_class = SubcategoryForm
+    template_name = 'dds_app/modals/add_subcategory_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+class SubcategoryUpdateView(BSModalUpdateView):
+    model = Subcategory
+    form_class = SubcategoryForm
+    template_name = 'dds_app/modals/update_subcategory_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+    def form_valid(self, form):
+        transactions = Transaction.objects.filter(subcategory=self.object)
+        for transaction in transactions:
+            transaction.category = self.object.category
+        Transaction.objects.bulk_update(transactions, ['category'])
+
+        response = super().form_valid(form)
+        
+        return response
+
+
+class ManagingDirectories(View):
+    def get(self, request, *args, **kwargs):
+        status = Status.objects.all().order_by('-pk')
+        operations_types = OperationType.objects.values('pk', 'name').order_by('-pk')
+        categories = Category.objects.values('pk', 'name').order_by('-pk')
+        subcategories = Subcategory.objects.values('pk', 'name').order_by('-pk')
+
+        context = {
+            'status': status,
+            'operations_types': operations_types,
+            'categories': categories,
+            'subcategories': subcategories
+        }
+
+        return render(request, 'dds_app/managing_directories.html', context=context)

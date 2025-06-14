@@ -23,7 +23,6 @@ class transactionsFilters(forms.Form):
         required=False,
     )
         
-
 class AddTransactionForm(BSModalModelForm):
     class Meta:
         model = Transaction
@@ -97,3 +96,58 @@ class AddTransactionForm(BSModalModelForm):
             instance.save()
         return instance
 
+class StatusForm(BSModalModelForm):
+    class Meta:
+        model = Status
+        fields = [
+            'name'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 'maxlength': '32'}
+            )
+        }
+
+class TypesForm(BSModalModelForm):
+    class Meta:
+        model = OperationType
+        fields = [
+            'name'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 'maxlength': '32'}
+            )
+        }
+
+class CategoryForm(BSModalModelForm):
+    class Meta:
+        model = Category
+        fields = [
+            'name',
+            'operation_type'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 'maxlength': '32'}
+            ),
+            'operation_type': forms.Select(attrs={
+                'class': 'form-control'
+            })
+        }
+
+class SubcategoryForm(BSModalModelForm):
+    class Meta:
+        model = Subcategory
+        fields = [
+            'name',
+            'category'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 'maxlength': '32'}
+            ),
+            'category': forms.Select(attrs={
+                'class': 'form-control'
+            })
+        }

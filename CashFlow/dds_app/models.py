@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 
 class Status(models.Model):
-    name = models.CharField(max_length=128, unique=True, verbose_name='Статус')
+    name = models.CharField(max_length=32, unique=True, verbose_name='Статус')
 
     class Meta:
         verbose_name = 'Статус'
@@ -16,7 +16,7 @@ class Status(models.Model):
         return self.name
 
 class OperationType(models.Model):
-    name = models.CharField(max_length=128, unique=True, verbose_name='Тип операции')
+    name = models.CharField(max_length=32, unique=True, verbose_name='Тип операции')
 
     class Meta:
         verbose_name = 'Тип операции'
@@ -26,7 +26,7 @@ class OperationType(models.Model):
         return self.name
 
 class Category(models.Model):
-    name = models.CharField(max_length=128, unique=True, verbose_name='Категория')
+    name = models.CharField(max_length=32, unique=True, verbose_name='Категория')
     operation_type = models.ForeignKey(
         OperationType, 
         on_delete=models.CASCADE, 
@@ -43,7 +43,7 @@ class Category(models.Model):
         return f'{self.operation_type.name} - {self.name}'
 
 class Subcategory(models.Model):
-    name = models.CharField(max_length=128, unique=True, verbose_name='Подкатегория')
+    name = models.CharField(max_length=32, unique=True, verbose_name='Подкатегория')
     category = models.ForeignKey(
         Category, 
         on_delete=models.CASCADE, 

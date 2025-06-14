@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block style %}
+<style>
+    /* Кастомные стили для скроллбара */
+    .scrollable-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .scrollable-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .scrollable-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    
+    .scrollable-list::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    .el-body {
+        cursor: pointer;
+
+        transition: all .3s ease-in-out;
+    }
+
+    .el-body:hover {
+        background-color: #ffc107a3;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div id="transactionAddModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div id="form-content" class="modal-content"></div>
+  </div>
+</div>
+
+    <h1 class="invalid-feedback">kekeke</h1>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-6 mb-4">
+            <div class="card border rounded-3">
+                <div class="card-header bg-light d-flex justify-content-between">
+                    <h3>Cтатусы</h3>
+                    <button id="add-status" type="button" class="btn btn-sm btn-outline-primary">Добавить статус</button>
+                </div>
+                <div class="card-body scrollable-list" style="height: 400px; overflow-y: auto;">
+                    {% for status_el in status %}
+                        <div class="card mb-3 el-body" data-form-url="{% url 'md_status_update_modal' pk=status_el.pk %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center">
+                                    <h5 class="card-title">{{ status_el.name }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 mb-4">
+            <div class="card border rounded-3">
+                <div class="card-header bg-light d-flex justify-content-between">
+                    <h3>Типы</h3>
+                    <button id="add-type" type="button" class="btn btn-sm btn-outline-primary">Добавить тип</button>
+                </div>
+                <div url-modal="operation_type" class="card-body scrollable-list" style="height: 400px; overflow-y: auto;">
+                    {% for operation_type in operations_types %}
+                        <div class="card mb-3 el-body" data-form-url="{% url 'md_type_update_modal' pk=operation_type.pk %}"">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center">
+                                    <h5 class="card-title">{{ operation_type.name }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 mb-4">
+            <div class="card border rounded-3">
+                <div class="card-header bg-light d-flex justify-content-between">
+                    <h3>Категории</h3>
+                    <button id="add-category" type="button" class="btn btn-sm btn-outline-primary">Добавить категорию</button>
+                </div>
+                <div class="card-body scrollable-list" style="height: 400px; overflow-y: auto;">
+                    {% for category in categories %}
+                        <div class="card mb-3 el-body" data-form-url="{% url 'md_category_update_modal' pk=category.pk %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center">
+                                    <h5 class="card-title">{{ category.name }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 mb-4">
+            <div class="card border rounded-3">
+                <div class="card-header bg-light d-flex justify-content-between">
+                    <h3>Подкатегории</h3>
+                    <button id="add-subcategory" type="button" class="btn btn-sm btn-outline-primary">Добавить подкатегорию</button>
+                </div>
+                <div class="card-body scrollable-list" style="height: 400px; overflow-y: auto;">
+                    {% for subcategory in subcategories %}
+                        <div class="card mb-3 el-body" data-form-url="{% url 'md_subcategory_update_modal' pk=subcategory.pk %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center">
+                                    <h5 class="card-title">{{ subcategory.name }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener("DOMContentLoaded", (e) => {
+        const elements = document.querySelectorAll('.el-body');
+        elements.forEach(el => {
+            modalForm(el, {
+                modalID: '#transactionAddModal',
+                formURL: el.getAttribute('data-form-url') 
+            });
+        });
+
+        modalForm(document.getElementById('add-status'), {
+            modalID: '#transactionAddModal',
+            formURL: "{% url 'md_status_add_modal' %}"
+        });
+
+        modalForm(document.getElementById('add-type'), {
+            modalID: '#transactionAddModal',
+            formURL: "{% url 'md_type_add_modal' %}"
+        });
+
+        modalForm(document.getElementById('add-category'), {
+            modalID: '#transactionAddModal',
+            formURL: "{% url 'md_category_add_modal' %}"
+        });
+
+        modalForm(document.getElementById('add-subcategory'), {
+            modalID: '#transactionAddModal',
+            formURL: "{% url 'md_subcategory_add_modal' %}"
+        });
+    });
+</script>
+{% endblock script %}

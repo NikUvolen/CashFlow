@@ -27,7 +27,6 @@ class LoginForm(forms.ModelForm):
             )
         return self.cleaned_data
     
-
 class RegistrationForm(forms.ModelForm):
     class Meta:
         model = User

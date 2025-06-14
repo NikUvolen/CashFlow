@@ -8,7 +8,8 @@
         </a>
         
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="{% url 'main_page' %}" class="nav-link px-2 text-dark">Home</a></li>
+          <li><a href="{% url 'main_page' %}" class="nav-link px-2 text-dark">Главная</a></li>
+          <li><a href="{% url 'managing_directories' %}" class="nav-link px-2 text-dark">Управление справочниками</a></li>
         </ul>
         
         {% if not request.user.is_authenticated %}
