@@ -1,8 +1,11 @@
 <form method="post" action="">
   {% csrf_token %}
 
- <div class="modal-header">
+  <div class="modal-header b-flex justify-content-between">
     <h5 class="modal-title">Изменение категории</h5>
+    <button type="button" class="btn btn-default" data-bs-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
   </div>
 
   <div class="modal-body">
@@ -18,7 +21,6 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Закрыть</button>
-    <button type="submit" class="btn btn-primary">Изменить</button>
+    <button type="submit" class="btn btn-warning">Изменить</button>
   </div>
 </form>

@@ -1,17 +1,20 @@
 const ctx = document.getElementById('myChart');
+const chart_data = document.getElementById('chart-data');
+let keys = [], values = [];
 
-  new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: [
-          'Red',
-          'Blue',
-          'Yellow'
-        ],
-        datasets: [{
-          label: 'Сумма',
-          data: [300, 50, 100],
-          hoverOffset: 4
-        }]
-    }
-  });
+Array.from(chart_data.children).forEach(child => {
+  keys.push(child.getAttribute('key'));
+  values.push(parseInt(child.getAttribute('value')));
+});
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: keys,
+      datasets: [{
+        label: 'Сумма',
+        data: values,
+        hoverOffset: 4
+      }]
+  }
+});

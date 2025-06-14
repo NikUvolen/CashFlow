@@ -34,6 +34,10 @@ class TransactionUpdateView(BSModalUpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+    
+class TransactionDeleteView(View):
+    #TODO: добавить удаление
+    pass
 
 class MainPageView(View):
     def get_filters(self, GET, queryset):
@@ -85,38 +89,25 @@ class MainPageView(View):
             addTransactionForm = AddTransactionForm(user=request.user)
 
     def get(self, request, *args, **kwargs):
-        # for transaction in transactions:
-        #     key = str(transaction.operation_type.name)
-        #     if key not in context['canvas_data']:
-        #         context['canvas_data'][key] = 0
-        #     else:
-        #         context['canvas_data'][key] += transaction.amount
-        # print(context['canvas_data'])
-
         if request.user.is_authenticated:
             context = self.login_get_context(request)
+            operations_types = list(OperationType.objects.all())
+            context['transactions'] = context['transactions'].filter(operation_type__in=operations_types)
+            chart = {}
+            for type in operations_types:
+                chart[str(type.name)] = 0
+                for transaction in context['transactions']:
+                    if transaction.operation_type == type:
+                        chart[str(type.name)] += transaction.amount
+            chart = {key: value for key, value in chart.items() if value != 0}
+
+            context['chart'] = chart
             return render(request, 'dds_app/main.html', context=context)
         else:
             return render(request, 'dds_app/welcome_page.html')
         
 
 # ---- Managing Directories page ---
-# class TransactionCreateView(BSModalCreateView):
-#     form_class = AddTransactionForm
-#     template_name = 'dds_app/add_transaction_modal_form.html'
-#     success_message = 'Success: Book was created.'
-#     success_url = reverse_lazy('main_page')
-
-#     def get_initial(self):
-#         initial = super().get_initial()
-#         initial['created_date'] = timezone.now().date()
-#         return initial
-    
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs['user'] = self.request.user
-#         return kwargs
-    
 class StatusCreateView(BSModalCreateView):
     form_class = StatusForm
     template_name = 'dds_app/modals/add_status_modal.html'

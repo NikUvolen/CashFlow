@@ -12,7 +12,8 @@ from .views import (
     CategoryCreateView,
     CategoryUpdateView,
     SubcategoryCreateView,
-    SubcategoryUpdateView
+    SubcategoryUpdateView,
+    TransactionDeleteView
 )
 from .models import Category, Subcategory
 
@@ -38,6 +39,7 @@ urlpatterns = [
     path('', MainPageView.as_view(), name='main_page'),
     path('transactions/create/', TransactionCreateView.as_view(), name='transaction_add_modal'),
     path('transaction/update/<int:pk>', TransactionUpdateView.as_view(), name='transaction_add_modal'),
+    path('transaction/delete/<int:pk>', TransactionDeleteView.as_view(), name='transaction_del_modal'),
     
     path('managing-directories/', ManagingDirectories.as_view(), name='managing_directories'),
     path('managing-directories/create/status', StatusCreateView.as_view(), name='md_status_add_modal'),
