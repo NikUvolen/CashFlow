@@ -30,7 +30,8 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'django_filters',
 
-    'dds_app'
+    'dds_app',
+    'auth_app'
 ]
 
 MIDDLEWARE = [
@@ -125,4 +126,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     join(BASE_DIR, 'CashFlow/static'),
     join(BASE_DIR, 'dds_app/static'),
+    join(BASE_DIR, 'auth_app/static'),
 ]

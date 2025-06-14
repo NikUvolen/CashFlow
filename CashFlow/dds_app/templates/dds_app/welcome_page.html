@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная{% endblock title %}
+
+{% block content %}
+<div class="welcome-page">
+    <!-- Hero Section -->
+    <section class="hero-section rounded bg-primary text-white py-5">
+        <div class="container py-5">
+            <div class="row align-items-center justify-content-center text-center text-lg-start">
+                <div class="col-lg-7 mb-4 mb-lg-0">
+                    <div class="mx-auto" style="max-width: 600px;">
+                        <h1 class="display-4 fw-bold mb-4">Контроль ваших финансов</h1>
+                        <p class="lead mb-4">Удобный инструмент для учета доходов и расходов. Начните управлять своими деньгами эффективно уже сегодня!</p>
+                        <div class="d-flex gap-3 justify-content-center justify-content-lg-start">
+                            <a href="{% url 'registration' %}" class="btn btn-light btn-lg px-4">Регистрация</a>
+                            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">Вход</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="text-center">
+                        <img src="{% static 'dds_app/images/finance-dashboard.png' %}" alt="Финансовый контроль" class="img-fluid" style="max-height: 400px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-5">
+        <div class="container py-5">
+            <h2 class="text-center mb-5 fw-bold">Как это работает</h2>
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="d-flex">
+                        <div class="me-4">
+                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">1</div>
+                        </div>
+                        <div>
+                            <h3 class="h4">Регистрация</h3>
+                            <p class="text-muted">Создайте аккаунт за 1 минуту и получите доступ ко всем возможностям</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="d-flex">
+                        <div class="me-4">
+                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">2</div>
+                        </div>
+                        <div>
+                            <h3 class="h4">Добавление операций</h3>
+                            <p class="text-muted">Вносите доходы и расходы в несколько кликов</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="d-flex">
+                        <div class="me-4">
+                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">3</div>
+                        </div>
+                        <div>
+                            <h3 class="h4">Анализ и контроль</h3>
+                            <p class="text-muted">Изучайте статистику и оптимизируйте бюджет</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container py-5 text-center">
+            <h2 class="display-5 fw-bold mb-4">Начните контролировать свои финансы сегодня</h2>
+            <a href="{% url 'registration' %}" class="btn btn-warning btn-lg px-5">Попробовать бесплатно</a>
+        </div>
+    </section>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #d8e72f8a 0%, #c58e16de 100%);
+    }
+    
+    .feature-icon {
+        transition: transform 0.3s;
+    }
+    
+    .card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}

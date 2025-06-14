@@ -56,15 +56,7 @@ class MainPageView(View):
 
         return queryset
 
-
-    def post(self, request):
-        addTransactionForm = AddTransactionForm(request.POST, user=request.user)
-        if addTransactionForm.is_valid():
-            addTransactionForm.save()
-        else:
-            addTransactionForm = AddTransactionForm(user=request.user)
-
-    def get(self, request, *args, **kwargs):
+    def login_get_context(self, request):
         transactions = Transaction.objects.select_related(
             'status',
             'operation_type',
@@ -82,6 +74,16 @@ class MainPageView(View):
             'canvas_data': {}
         }
 
+        return context
+
+    def post(self, request):
+        addTransactionForm = AddTransactionForm(request.POST, user=request.user)
+        if addTransactionForm.is_valid():
+            addTransactionForm.save()
+        else:
+            addTransactionForm = AddTransactionForm(user=request.user)
+
+    def get(self, request, *args, **kwargs):
         # for transaction in transactions:
         #     key = str(transaction.operation_type.name)
         #     if key not in context['canvas_data']:
@@ -90,5 +92,8 @@ class MainPageView(View):
         #         context['canvas_data'][key] += transaction.amount
         # print(context['canvas_data'])
 
-
-        return render(request, 'dds_app/main.html', context=context)
+        if request.user.is_authenticated:
+            context = self.login_get_context(request)
+            return render(request, 'dds_app/main.html', context=context)
+        else:
+            return render(request, 'dds_app/welcome_page.html')

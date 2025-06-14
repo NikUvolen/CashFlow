@@ -60,7 +60,7 @@ class AddTransactionForm(BSModalModelForm):
                 )
             except (ValueError, TypeError):
                 pass
-        elif self.instance.pk:  # Для редактирования существующей записи
+        elif self.instance.pk:  # Редактирование существующей записи
             self.fields['category'].queryset = self.instance.operation_type.categories.all()
 
         if 'category' in self.data:

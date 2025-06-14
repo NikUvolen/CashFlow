@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card shadow-lg my-5">
+                <div class="card-header bg-warning text-white">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="{% url 'login' %}">Вход</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active text-dark bg-light" href="{% url 'registration' %}">Регистрация</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form id="register-form" action="" method="POST" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Имя пользователя <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   name="username" 
+                                   class="form-control form-control-lg {% if form.username.errors %}is-invalid{% endif %}" 
+                                   id="id_username" 
+                                   required
+                                   value="{{ form.username.value|default_if_none:'' }}">
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.username.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Пароль <span class="text-danger">*</span></label>
+                            <input type="password" 
+                                   name="password" 
+                                   class="form-control form-control-lg {% if form.password.errors %}is-invalid{% endif %}" 
+                                   id="id_password" 
+                                   required>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.password.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="id_confirm_password" class="form-label">Подтверждение пароля <span class="text-danger">*</span></label>
+                            <input type="password" 
+                                   name="confirm_password" 
+                                   class="form-control form-control-lg {% if form.confirm_password.errors %}is-invalid{% endif %}" 
+                                   id="id_confirm_password" 
+                                   required>
+                            {% if form.confirm_password.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.confirm_password.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-warning btn-lg" type="submit" name="submit" value="registration">
+                                Зарегистрироваться
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer text-center py-3">
+                    <p class="mb-0">Уже есть аккаунт? <a href="{% url 'login' %}" class="text-decoration-none">Войти</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if form.non_field_errors %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h5 class="alert-heading">Ошибка входа</h5>
+                <ul class="mb-0">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'auth_app/js/forms.js' %}"></script>
+    <script>
+        (function () {
+            'use strict'
+            
+            const forms = document.querySelectorAll('.needs-validation')
+            
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    
+                    form.classList.add('was-validated')
+                }, false)
+            })
+            
+            const passwordInput = document.getElementById('id_password');
+            const confirmPasswordInput = document.getElementById('id_confirm_password');
+            
+            if (passwordInput && confirmPasswordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    const length = document.getElementById('length');
+                    const letter = document.getElementById('letter');
+                    const number = document.getElementById('number');
+                    
+                    if (password.length >= 8) {
+                        length.classList.remove('text-muted');
+                        length.classList.add('text-success');
+                    } else {
+                        length.classList.remove('text-success');
+                        length.classList.add('text-muted');
+                    }
+                    
+                    if (/[A-Za-z]/.test(password)) {
+                        letter.classList.remove('text-muted');
+                        letter.classList.add('text-success');
+                    } else {
+                        letter.classList.remove('text-success');
+                        letter.classList.add('text-muted');
+                    }
+                    
+                    if (/[0-9]/.test(password)) {
+                        number.classList.remove('text-muted');
+                        number.classList.add('text-success');
+                    } else {
+                        number.classList.remove('text-success');
+                        number.classList.add('text-muted');
+                    }
+                });
+                
+                confirmPasswordInput.addEventListener('input', function() {
+                    if (this.value !== passwordInput.value) {
+                        this.setCustomValidity('Пароли не совпадают');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+        })();
+    </script>
+{% endblock scripts %}
