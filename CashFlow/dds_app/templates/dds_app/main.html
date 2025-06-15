@@ -14,6 +14,13 @@
   {% endfor %}
 </div>
 
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+    </div>
+  </div>
+</div>
+
 <div id="transactionAddModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div id="form-content" class="modal-content"></div>
@@ -143,6 +150,8 @@
 {% block script %}
 <script type="text/javascript">
   let modal = document.getElementById('form-content');
+  const deleteModal = document.getElementById('deleteModal');
+  const bsMainModal = document.getElementById('transactionAddModal');
 
   document.addEventListener("DOMContentLoaded", (e) => {
     let form = document.getElementById('form-content');
@@ -150,6 +159,29 @@
     modalForm(document.getElementById('add-transaction'), {
       modalID: '#transactionAddModal',
       formURL: "{% url 'transaction_add_modal' %}"
+    });
+
+    // Обработка и вывод окна удаления
+    document.addEventListener('click', (el) => {
+      let bsDeleteModal;
+      if (el.target.closest('[data-bs-target="#deleteModal"]')) {
+        const deleteUrl = el.target.getAttribute('data-delete-url');
+        const deleteModalContent = deleteModal.querySelector('.modal-content');
+
+        fetch(deleteUrl)
+          .then(response => response.text())
+          .then(html => {
+            deleteModalContent.innerHTML = html;
+          })
+      }
+    })
+
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('[data-bs-dismiss="modal"]') && 
+          e.target.closest('#deleteModal')) {
+        deleteModal.getElementsByClassName('modal-content').innerHTML = "";
+        deleteModal.style.display = 'none';
+      }
     });
 
     const fetchFunc = function(apiUrl, value, targetId, parentId, childId = null) {
@@ -168,7 +200,6 @@
         .catch(error => console.error('Error:', error));
     }
 
-    const idxs = ['id_operation_type', 'id_status', 'id_subcategory'];
     document.getElementById('form-content').addEventListener('change', (e) => {
       const value = e.target.value;
       if (value) {
@@ -185,12 +216,14 @@
     
 
     const updateBtns = document.querySelectorAll('.modal-update');
+    let updatesModals = [];
     updateBtns.forEach(area => {
       const formURL = area.dataset['formUrl'];
-      modalForm(area, {
+      const btn = modalForm(area, {
         modalID: '#transactionAddModal',
         formURL: formURL
       });
+      updatesModals.push(btn);
     });
   });
 </script>

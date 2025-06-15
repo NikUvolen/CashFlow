@@ -21,6 +21,14 @@
   </div>
 
   <div class="modal-footer">
+    <button id="delete-btn-id"
+        type="button" 
+        class="btn btn-danger me-auto" 
+        data-bs-toggle="modal" 
+        data-bs-target="#deleteModal"
+        data-delete-url="{% url 'md_subcategory_delete_modal' pk=object.pk %}">
+      Удалить
+    </button>
     <button type="submit" class="btn btn-warning">Изменить</button>
   </div>
 </form>

@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView
+from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalDeleteView
 from .models import *
 from .forms import AddTransactionForm, StatusForm, TypesForm, CategoryForm, SubcategoryForm
 from .filters import TransactionFilter
@@ -30,17 +30,28 @@ class TransactionUpdateView(BSModalUpdateView):
     form_class = AddTransactionForm
     success_url = reverse_lazy('main_page')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['obj_pk'] = self.object.pk
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
     
-class TransactionDeleteView(View):
-    #TODO: добавить удаление
-    pass
+class TransactionDeleteView(BSModalDeleteView):
+    model = Transaction
+    template_name = 'dds_app/modals/delete_transaction_modal.html'
+    success_message = 'Транзакция успешно удалена'
+    success_url = reverse_lazy('main_page')
 
 class MainPageView(View):
     def get_filters(self, GET, queryset):
+        """
+            Фильтрация
+        """
+
         date_from = GET.get('start_date')
         date_to = GET.get('end_date')
         status = GET.get('status')
@@ -91,6 +102,8 @@ class MainPageView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             context = self.login_get_context(request)
+
+            # Конфигурация графика с расходами
             operations_types = list(OperationType.objects.all())
             context['transactions'] = context['transactions'].filter(operation_type__in=operations_types)
             chart = {}
@@ -119,6 +132,12 @@ class StatusUpdateView(BSModalUpdateView):
     template_name = 'dds_app/modals/update_status_modal.html'
     success_url = reverse_lazy('managing_directories')
 
+class StatusDeleteView(BSModalDeleteView):
+    model = Status
+    template_name = 'dds_app/modals/delete_status_modal.html'
+    success_message = 'Статус успешно удалена'
+    success_url = reverse_lazy('managing_directories')
+
 class TypeCreateView(BSModalCreateView):
     form_class = TypesForm
     template_name = 'dds_app/modals/add_type_modal.html'
@@ -128,6 +147,12 @@ class TypeUpdateView(BSModalUpdateView):
     model = OperationType
     form_class = TypesForm
     template_name = 'dds_app/modals/update_type_modal.html'
+    success_url = reverse_lazy('managing_directories')
+
+class TypeDeleteView(BSModalDeleteView):
+    model = OperationType
+    template_name = 'dds_app/modals/delete_type_modal.html'
+    success_message = 'Тип успешно удалена'
     success_url = reverse_lazy('managing_directories')
 
 class CategoryCreateView(BSModalCreateView):
@@ -151,6 +176,12 @@ class CategoryUpdateView(BSModalUpdateView):
         
         return response
 
+class CategoryDeleteView(BSModalDeleteView):
+    model = Category
+    template_name = 'dds_app/modals/delete_category_modal.html'
+    success_message = 'Категория успешно удалена'
+    success_url = reverse_lazy('managing_directories')
+
 class SubcategoryCreateView(BSModalCreateView):
     form_class = SubcategoryForm
     template_name = 'dds_app/modals/add_subcategory_modal.html'
@@ -172,6 +203,11 @@ class SubcategoryUpdateView(BSModalUpdateView):
         
         return response
 
+class SubcategoryDeleteView(BSModalDeleteView):
+    model = Subcategory
+    template_name = 'dds_app/modals/delete_subcategory_modal.html'
+    success_message = 'Подкатегория успешно удалена'
+    success_url = reverse_lazy('managing_directories')
 
 class ManagingDirectories(View):
     def get(self, request, *args, **kwargs):

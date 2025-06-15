@@ -1,0 +1,18 @@
+<form method="post" action="{% url 'md_category_delete_modal' pk=object.pk %}">
+  {% csrf_token %}
+
+  <div class="modal-header">
+    <h5 class="modal-title">Подтверждение удаления</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+
+  <div class="modal-body">
+    <p>Вы уверены, что хотите удалить категорию <b>{{ object }}</b>? </p>
+    <p style="font-weight: 700;" >Это действие нельзя отменить. Все связанные с этой категорией подкатегории будут удалены!</p>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+    <button type="submit" class="btn btn-danger">Удалить</button>
+  </div>
+</form>

@@ -34,13 +34,18 @@
 {% endblock style %}
 
 {% block content %}
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+    </div>
+  </div>
+</div>
+
 <div id="transactionAddModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div id="form-content" class="modal-content"></div>
   </div>
 </div>
-
-    <h1 class="invalid-feedback">kekeke</h1>
 
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -155,6 +160,21 @@
             modalID: '#transactionAddModal',
             formURL: "{% url 'md_subcategory_add_modal' %}"
         });
+
+        // Обработка и вывод окна удаления
+        document.addEventListener('click', (el) => {
+            let bsDeleteModal;
+            if (el.target.closest('[data-bs-target="#deleteModal"]')) {
+                const deleteUrl = el.target.getAttribute('data-delete-url');
+                const deleteModalContent = deleteModal.querySelector('.modal-content');
+
+                fetch(deleteUrl)
+                .then(response => response.text())
+                .then(html => {
+                    deleteModalContent.innerHTML = html;
+                })
+            }
+        })
     });
 </script>
 {% endblock script %}

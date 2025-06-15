@@ -63,10 +63,10 @@ class Subcategory(models.Model):
 class Transaction(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Владелец')
     created_date = models.DateField(default=timezone.now, verbose_name='Дата создания')
-    status = models.ForeignKey(Status, on_delete=models.PROTECT, verbose_name='Статус')
-    operation_type = models.ForeignKey(OperationType, on_delete=models.PROTECT, verbose_name='Тип операции')
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='Категория')
-    subcategory = models.ForeignKey(Subcategory, on_delete=models.PROTECT, verbose_name='Подкатегория')
+    status = models.ForeignKey(Status, on_delete=models.CASCADE, verbose_name='Статус')
+    operation_type = models.ForeignKey(OperationType, on_delete=models.CASCADE, verbose_name='Тип операции')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
+    subcategory = models.ForeignKey(Subcategory, on_delete=models.CASCADE, verbose_name='Подкатегория')
     amount = models.DecimalField(
         max_digits=12, decimal_places=2, 
         validators=[MinValueValidator(.01)], 
