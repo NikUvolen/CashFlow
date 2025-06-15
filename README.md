@@ -31,4 +31,4 @@
 
 ![md_update_page.png](screens/md_update_page.png)
 
-![md_delete_page.png](screens/md_update_page.png)
+![md_delete_page.png](screens/md_delete_page.png)
