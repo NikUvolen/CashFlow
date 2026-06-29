@@ -1,8 +1,8 @@
 from os import getenv
 from os.path import join
 from pathlib import Path
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,7 +18,11 @@ SECRET_KEY = getenv('SECRET_KEY', 'django-insecure-change-me')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [host.strip() for host in getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,web').split(',') if host.strip()]
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,web').split(',')
+    if host.strip()
+]
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in getenv(
@@ -41,9 +45,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'bootstrap_modal_forms',
     'django_filters',
-
     'dds_app',
-    'auth_app'
+    'auth_app',
 ]
 
 MIDDLEWARE = [

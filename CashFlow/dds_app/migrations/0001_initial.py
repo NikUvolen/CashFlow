@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -19,9 +18,27 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OperationType',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
                 ('name', models.CharField(max_length=32, verbose_name='Тип операции')),
-                ('owner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='operation_types', to=settings.AUTH_USER_MODEL, verbose_name='Владелец')),
+                (
+                    'owner',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='operation_types',
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name='Владелец',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Тип операции',
@@ -32,10 +49,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Category',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
                 ('name', models.CharField(max_length=32, verbose_name='Категория')),
-                ('owner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='categories', to=settings.AUTH_USER_MODEL, verbose_name='Владелец')),
-                ('operation_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='categories', to='dds_app.operationtype', verbose_name='Тип операции')),
+                (
+                    'owner',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='categories',
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name='Владелец',
+                    ),
+                ),
+                (
+                    'operation_type',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='categories',
+                        to='dds_app.operationtype',
+                        verbose_name='Тип операции',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Категория',
@@ -46,9 +89,27 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Status',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
                 ('name', models.CharField(max_length=32, verbose_name='Статус')),
-                ('owner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='statuses', to=settings.AUTH_USER_MODEL, verbose_name='Владелец')),
+                (
+                    'owner',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='statuses',
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name='Владелец',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Статус',
@@ -59,9 +120,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Subcategory',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
                 ('name', models.CharField(max_length=32, verbose_name='Подкатегория')),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subcategories', to='dds_app.category', verbose_name='Категория')),
+                (
+                    'category',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='subcategories',
+                        to='dds_app.category',
+                        verbose_name='Категория',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Подкатегория',
@@ -73,15 +150,74 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Transaction',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_date', models.DateField(default=django.utils.timezone.now, verbose_name='Дата создания')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12, validators=[django.core.validators.MinValueValidator(0.01)], verbose_name='Сумма (руб)')),
-                ('comment', models.TextField(blank=True, null=True, verbose_name='Комментарий')),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dds_app.category', verbose_name='Категория')),
-                ('operation_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dds_app.operationtype', verbose_name='Тип операции')),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Владелец')),
-                ('status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dds_app.status', verbose_name='Статус')),
-                ('subcategory', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dds_app.subcategory', verbose_name='Подкатегория')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
+                (
+                    'created_date',
+                    models.DateField(
+                        default=django.utils.timezone.now, verbose_name='Дата создания'
+                    ),
+                ),
+                (
+                    'amount',
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=12,
+                        validators=[django.core.validators.MinValueValidator(0.01)],
+                        verbose_name='Сумма (руб)',
+                    ),
+                ),
+                (
+                    'comment',
+                    models.TextField(blank=True, null=True, verbose_name='Комментарий'),
+                ),
+                (
+                    'category',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='dds_app.category',
+                        verbose_name='Категория',
+                    ),
+                ),
+                (
+                    'operation_type',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='dds_app.operationtype',
+                        verbose_name='Тип операции',
+                    ),
+                ),
+                (
+                    'owner',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name='Владелец',
+                    ),
+                ),
+                (
+                    'status',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='dds_app.status',
+                        verbose_name='Статус',
+                    ),
+                ),
+                (
+                    'subcategory',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='dds_app.subcategory',
+                        verbose_name='Подкатегория',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Движение денежных средств',

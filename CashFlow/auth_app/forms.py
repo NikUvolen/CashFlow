@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-
 User = get_user_model()
 
 
@@ -26,7 +25,8 @@ class LoginForm(forms.ModelForm):
                 f'Пользователь {username} не найден или неправильно введен пароль.'
             )
         return self.cleaned_data
-    
+
+
 class RegistrationForm(forms.ModelForm):
     class Meta:
         model = User
@@ -40,11 +40,11 @@ class RegistrationForm(forms.ModelForm):
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError(f'Имя {username} занято. Попробуйте снова')
         return username
-    
+
     def clean(self):
         if 'confirm_password' not in self.cleaned_data:
             raise forms.ValidationError('Введите подтверждение пароля')
-        
+
         password = self.cleaned_data['password']
         confirm_password = self.cleaned_data['confirm_password']
         if password != confirm_password:

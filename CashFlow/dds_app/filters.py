@@ -1,5 +1,6 @@
 from django import forms
-from django_filters import FilterSet, DateFilter, ModelChoiceFilter
+from django_filters import DateFilter, FilterSet, ModelChoiceFilter
+
 from .models import *
 
 
@@ -12,54 +13,46 @@ class TransactionFilter(FilterSet):
         field_name='created_date',
         lookup_expr='gte',
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        label='Дата от'
+        label='Дата от',
     )
-    
+
     date_to = DateFilter(
         field_name='created_date',
         lookup_expr='lte',
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        label='Дата до'
+        label='Дата до',
     )
 
     status = ModelChoiceFilter(
         field_name='status',
-        queryset = Status.objects.all(),
-        widget=forms.Select(attrs={
-            'class': 'form-select'
-        }),
+        queryset=Status.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
         required=False,
-        label='Статус'
+        label='Статус',
     )
 
     operation_type = ModelChoiceFilter(
         field_name='operation_type',
-        queryset = OperationType.objects.all(),
-        widget=forms.Select(attrs={
-            'class': 'form-select'
-        }),
+        queryset=OperationType.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
         required=False,
-        label='Тип операции'
+        label='Тип операции',
     )
 
     category = ModelChoiceFilter(
         field_name='category',
-        queryset = Category.objects.none(),
-        widget=forms.Select(attrs={
-            'class': 'form-select'
-        }),
+        queryset=Category.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
         required=False,
-        label='Категория'
+        label='Категория',
     )
 
     subcategory = ModelChoiceFilter(
         field_name='subcategory',
-        queryset = Subcategory.objects.none(),
-        widget=forms.Select(attrs={
-            'class': 'form-select'
-        }),
+        queryset=Subcategory.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
         required=False,
-        label='Подкатегория'
+        label='Подкатегория',
     )
 
     def __init__(self, *args, **kwargs):
@@ -68,6 +61,10 @@ class TransactionFilter(FilterSet):
 
         if owner:
             self.filters['status'].queryset = Status.objects.filter(owner=owner)
-            self.filters['operation_type'].queryset = OperationType.objects.filter(owner=owner)
-            self.filters['subcategory'].queryset = Subcategory.objects.filter(category__owner=owner)
+            self.filters['operation_type'].queryset = OperationType.objects.filter(
+                owner=owner
+            )
+            self.filters['subcategory'].queryset = Subcategory.objects.filter(
+                category__owner=owner
+            )
             self.filters['category'].queryset = Category.objects.filter(owner=owner)
