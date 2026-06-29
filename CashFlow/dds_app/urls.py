@@ -5,17 +5,28 @@ from .models import Category, Subcategory
 
 
 def get_categories(request):
+    if not request.user.is_authenticated:
+        return JsonResponse('<option value="">---------</option>', safe=False)
+
     operation_type_id = request.GET.get('id_operation_type')
-    categories = Category.objects.filter(operation_type_id=operation_type_id)
+    categories = Category.objects.filter(
+        owner=request.user,
+        operation_type_id=operation_type_id,
+    )
     options = '<option value="">---------</option>'
     for category in categories:
         options += f'<option value="{category.id}">{category.name}</option>'
-    print(options)
     return JsonResponse(options, safe=False)
 
 def get_subcategories(request):
+    if not request.user.is_authenticated:
+        return JsonResponse('<option value="">---------</option>', safe=False)
+
     category_id = request.GET.get('id_category')
-    subcategories = Subcategory.objects.filter(category_id=category_id)
+    subcategories = Subcategory.objects.filter(
+        category_id=category_id,
+        category__owner=request.user,
+    )
     options = '<option value="">---------</option>'
     for subcategory in subcategories:
         options += f'<option value="{subcategory.id}">{subcategory.name}</option>'

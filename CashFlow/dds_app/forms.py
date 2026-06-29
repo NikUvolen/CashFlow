@@ -45,29 +45,29 @@ class AddTransactionForm(BSModalModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
-        self.fields['status'].queryset = Status.objects.all()
-        self.fields['operation_type'].queryset = OperationType.objects.all()
+
+        if getattr(self.user, 'is_authenticated', False):
+            self.fields['status'].queryset = Status.objects.filter(owner=self.user)
+            self.fields['operation_type'].queryset = OperationType.objects.filter(owner=self.user)
+        else:
+            self.fields['status'].queryset = Status.objects.none()
+            self.fields['operation_type'].queryset = OperationType.objects.none()
         self.fields['category'].queryset = Category.objects.none()
         self.fields['subcategory'].queryset = Subcategory.objects.none()
 
-        if 'operation_type' in self.data:
+        if getattr(self.user, 'is_authenticated', False) and 'operation_type' in self.data:
             try:
                 operation_type_id = int(self.data.get('operation_type'))
-                self.fields['category'].queryset = Category.objects.filter(
-                    operation_type_id=operation_type_id
-                )
+                self.fields['category'].queryset = Category.objects.filter(owner=self.user, operation_type_id=operation_type_id)
             except (ValueError, TypeError):
                 pass
-        elif self.instance.pk:  # Редактирование существующей записи
-            self.fields['category'].queryset = self.instance.operation_type.categories.all()
+        elif getattr(self.user, 'is_authenticated', False) and self.instance.pk:  # Редактирование существующей записи
+            self.fields['category'].queryset = self.instance.operation_type.categories.filter(owner=self.user)
 
-        if 'category' in self.data:
+        if getattr(self.user, 'is_authenticated', False) and 'category' in self.data:
             try:
                 category_id = int(self.data.get('category'))
-                self.fields['subcategory'].queryset = Subcategory.objects.filter(
-                    category_id=category_id
-                )
+                self.fields['subcategory'].queryset = Subcategory.objects.filter(category_id=category_id, category__owner=self.user)
             except (ValueError, TypeError):
                 pass
         elif self.instance.pk and self.instance.category:
@@ -77,26 +77,48 @@ class AddTransactionForm(BSModalModelForm):
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
 
+    def _post_clean(self):
+        if getattr(self.user, 'is_authenticated', False):
+            self.instance.owner = self.user
+        super()._post_clean()
+
     def clean(self):
         cleaned_data = super().clean()
+        if not getattr(self.user, 'is_authenticated', False):
+            raise forms.ValidationError('Пользователь должен быть авторизован.')
         # Проверка соответствия подкатегории и категории
         category = cleaned_data.get('category')
         subcategory = cleaned_data.get('subcategory')
         
         if subcategory and category and subcategory.category != category:
             raise forms.ValidationError("Выбранная подкатегория не принадлежит этой категории.")
+        if cleaned_data.get('status') and cleaned_data['status'].owner != self.user:
+            raise forms.ValidationError('Выбранный статус принадлежит другому пользователю.')
+        if cleaned_data.get('operation_type') and cleaned_data['operation_type'].owner != self.user:
+            raise forms.ValidationError('Выбранный тип операции принадлежит другому пользователю.')
+        if category and category.owner != self.user:
+            raise forms.ValidationError('Выбранная категория принадлежит другому пользователю.')
+        if subcategory and subcategory.category.owner != self.user:
+            raise forms.ValidationError('Выбранная подкатегория принадлежит другому пользователю.')
 
         return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        print(self.user)
         instance.owner = self.user
         if commit:
             instance.save()
         return instance
 
 class StatusForm(BSModalModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        self.instance.owner = self.user
+        return super().clean()
+
     class Meta:
         model = Status
         fields = [
@@ -108,7 +130,22 @@ class StatusForm(BSModalModelForm):
             )
         }
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.owner = self.user
+        if commit:
+            instance.save()
+        return instance
+
 class TypesForm(BSModalModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        self.instance.owner = self.user
+        return super().clean()
+
     class Meta:
         model = OperationType
         fields = [
@@ -120,7 +157,22 @@ class TypesForm(BSModalModelForm):
             )
         }
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.owner = self.user
+        if commit:
+            instance.save()
+        return instance
+
 class CategoryForm(BSModalModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        self.instance.owner = self.user
+        return super().clean()
+
     class Meta:
         model = Category
         fields = [
@@ -136,7 +188,20 @@ class CategoryForm(BSModalModelForm):
             })
         }
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.owner = self.user
+        if commit:
+            instance.save()
+        return instance
+
 class SubcategoryForm(BSModalModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields['category'].queryset = Category.objects.filter(owner=self.user)
+
     class Meta:
         model = Subcategory
         fields = [

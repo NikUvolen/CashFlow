@@ -6,27 +6,53 @@ from django.core.exceptions import ValidationError
 
 
 class Status(models.Model):
-    name = models.CharField(max_length=32, unique=True, verbose_name='Статус')
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='statuses',
+        verbose_name='Владелец',
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(max_length=32, verbose_name='Статус')
 
     class Meta:
         verbose_name = 'Статус'
         verbose_name_plural = 'Статусы'
+        unique_together = ('owner', 'name')
 
     def __str__(self):
         return self.name
 
 class OperationType(models.Model):
-    name = models.CharField(max_length=32, unique=True, verbose_name='Тип операции')
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='operation_types',
+        verbose_name='Владелец',
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(max_length=32, verbose_name='Тип операции')
 
     class Meta:
         verbose_name = 'Тип операции'
         verbose_name_plural = 'Типы операций'
+        unique_together = ('owner', 'name')
 
     def __str__(self):
         return self.name
 
 class Category(models.Model):
-    name = models.CharField(max_length=32, unique=True, verbose_name='Категория')
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='categories',
+        verbose_name='Владелец',
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(max_length=32, verbose_name='Категория')
     operation_type = models.ForeignKey(
         OperationType, 
         on_delete=models.CASCADE, 
@@ -37,13 +63,13 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        unique_together = ('operation_type', 'name')
+        unique_together = ('owner', 'operation_type', 'name')
 
     def __str__(self):
         return f'{self.operation_type.name} - {self.name}'
 
 class Subcategory(models.Model):
-    name = models.CharField(max_length=32, unique=True, verbose_name='Подкатегория')
+    name = models.CharField(max_length=32, verbose_name='Подкатегория')
     category = models.ForeignKey(
         Category, 
         on_delete=models.CASCADE, 
@@ -83,9 +109,15 @@ class Transaction(models.Model):
         return f'{self.created_date.strftime('%d.%m.%Y')} | {self.operation_type.name} {self.amount} руб.'
     
     def clean(self):
-        if self.subcategory and self.subcategory.category != self.category:
+        if self.status and self.status.owner != self.owner:
+            raise ValidationError('Статус не принадлежит владельцу транзакции')
+        if self.operation_type and self.operation_type.owner != self.owner:
+            raise ValidationError('Тип операции не принадлежит владельцу транзакции')
+        if self.category and self.category.owner != self.owner:
+            raise ValidationError('Категория не принадлежит владельцу транзакции')
+        if self.subcategory and self.category and self.subcategory.category != self.category:
             raise ValidationError('Подкатегория не принадлежит выбранной категории')
-        if self.category.operation_type != self.operation_type:
+        if self.category and self.operation_type and self.category.operation_type != self.operation_type:
             raise ValidationError('Категория не принадлежит выбранному типу операции')
     
     def save(self, *args, **kwargs):

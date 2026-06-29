@@ -1,3 +1,6 @@
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import ProtectedError
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -8,7 +11,51 @@ from .filters import TransactionFilter
 
 
 # ---- MAIN PAGE ----
-class TransactionCreateView(BSModalCreateView):
+class ProtectedDeleteMixin:
+    protected_error_message = 'Нельзя удалить объект, пока он используется в транзакциях.'
+
+    def post(self, request, *args, **kwargs):
+        try:
+            return super().post(request, *args, **kwargs)
+        except ProtectedError:
+            messages.error(request, self.protected_error_message)
+            return redirect(self.get_success_url())
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        try:
+            return super().delete(request, *args, **kwargs)
+        except ProtectedError:
+            messages.error(request, self.protected_error_message)
+            return redirect(self.get_success_url())
+
+
+class UserOwnedTransactionMixin:
+    def get_queryset(self):
+        return self.model.objects.filter(owner=self.request.user)
+
+
+class UserOwnedCategoryMixin:
+    def get_queryset(self):
+        return self.model.objects.filter(owner=self.request.user)
+
+
+class UserOwnedStatusMixin:
+    def get_queryset(self):
+        return self.model.objects.filter(owner=self.request.user)
+
+
+class UserOwnedOperationTypeMixin:
+    def get_queryset(self):
+        return self.model.objects.filter(owner=self.request.user)
+
+
+class UserOwnedSubcategoryMixin:
+    def get_queryset(self):
+        return self.model.objects.filter(category__owner=self.request.user)
+
+
+class TransactionCreateView(LoginRequiredMixin, BSModalCreateView):
     form_class = AddTransactionForm
     template_name = 'dds_app/modals/add_transaction_modal.html'
     success_message = 'Success: Book was created.'
@@ -24,7 +71,7 @@ class TransactionCreateView(BSModalCreateView):
         kwargs['user'] = self.request.user
         return kwargs
 
-class TransactionUpdateView(BSModalUpdateView):
+class TransactionUpdateView(LoginRequiredMixin, UserOwnedTransactionMixin, BSModalUpdateView):
     model = Transaction
     template_name = 'dds_app/modals/update_transaction_modal.html'
     form_class = AddTransactionForm
@@ -40,7 +87,7 @@ class TransactionUpdateView(BSModalUpdateView):
         kwargs['user'] = self.request.user
         return kwargs
     
-class TransactionDeleteView(BSModalDeleteView):
+class TransactionDeleteView(LoginRequiredMixin, UserOwnedTransactionMixin, BSModalDeleteView):
     model = Transaction
     template_name = 'dds_app/modals/delete_transaction_modal.html'
     success_message = 'Транзакция успешно удалена'
@@ -104,7 +151,7 @@ class MainPageView(View):
             context = self.login_get_context(request)
 
             # Конфигурация графика с расходами
-            operations_types = list(OperationType.objects.all())
+            operations_types = list(OperationType.objects.filter(owner=request.user))
             context['transactions'] = context['transactions'].filter(operation_type__in=operations_types)
             chart = {}
             for type in operations_types:
@@ -121,53 +168,83 @@ class MainPageView(View):
         
 
 # ---- Managing Directories page ---
-class StatusCreateView(BSModalCreateView):
+class StatusCreateView(LoginRequiredMixin, BSModalCreateView):
     form_class = StatusForm
     template_name = 'dds_app/modals/add_status_modal.html'
     success_url = reverse_lazy('managing_directories')
 
-class StatusUpdateView(BSModalUpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class StatusUpdateView(LoginRequiredMixin, UserOwnedStatusMixin, BSModalUpdateView):
     model = Status
     form_class = StatusForm
     template_name = 'dds_app/modals/update_status_modal.html'
     success_url = reverse_lazy('managing_directories')
 
-class StatusDeleteView(BSModalDeleteView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class StatusDeleteView(LoginRequiredMixin, UserOwnedStatusMixin, ProtectedDeleteMixin, BSModalDeleteView):
     model = Status
     template_name = 'dds_app/modals/delete_status_modal.html'
     success_message = 'Статус успешно удалена'
     success_url = reverse_lazy('managing_directories')
 
-class TypeCreateView(BSModalCreateView):
+class TypeCreateView(LoginRequiredMixin, BSModalCreateView):
     form_class = TypesForm
     template_name = 'dds_app/modals/add_type_modal.html'
     success_url = reverse_lazy('managing_directories')
 
-class TypeUpdateView(BSModalUpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class TypeUpdateView(LoginRequiredMixin, UserOwnedOperationTypeMixin, BSModalUpdateView):
     model = OperationType
     form_class = TypesForm
     template_name = 'dds_app/modals/update_type_modal.html'
     success_url = reverse_lazy('managing_directories')
 
-class TypeDeleteView(BSModalDeleteView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class TypeDeleteView(LoginRequiredMixin, UserOwnedOperationTypeMixin, ProtectedDeleteMixin, BSModalDeleteView):
     model = OperationType
     template_name = 'dds_app/modals/delete_type_modal.html'
     success_message = 'Тип успешно удалена'
     success_url = reverse_lazy('managing_directories')
 
-class CategoryCreateView(BSModalCreateView):
+class CategoryCreateView(LoginRequiredMixin, BSModalCreateView):
     form_class = CategoryForm
     template_name = 'dds_app/modals/add_category_modal.html'
     success_url = reverse_lazy('managing_directories')
 
-class CategoryUpdateView(BSModalUpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class CategoryUpdateView(LoginRequiredMixin, UserOwnedCategoryMixin, BSModalUpdateView):
     model = Category
     form_class = CategoryForm
     template_name = 'dds_app/modals/update_category_modal.html'
     success_url = reverse_lazy('managing_directories')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
-        transactions = Transaction.objects.filter(category=self.object)
+        transactions = Transaction.objects.filter(owner=self.request.user, category=self.object)
         for transaction in transactions:
             transaction.operation_type = self.object.operation_type
         Transaction.objects.bulk_update(transactions, ['operation_type'])
@@ -176,25 +253,35 @@ class CategoryUpdateView(BSModalUpdateView):
         
         return response
 
-class CategoryDeleteView(BSModalDeleteView):
+class CategoryDeleteView(LoginRequiredMixin, UserOwnedCategoryMixin, ProtectedDeleteMixin, BSModalDeleteView):
     model = Category
     template_name = 'dds_app/modals/delete_category_modal.html'
     success_message = 'Категория успешно удалена'
     success_url = reverse_lazy('managing_directories')
 
-class SubcategoryCreateView(BSModalCreateView):
+class SubcategoryCreateView(LoginRequiredMixin, BSModalCreateView):
     form_class = SubcategoryForm
     template_name = 'dds_app/modals/add_subcategory_modal.html'
     success_url = reverse_lazy('managing_directories')
 
-class SubcategoryUpdateView(BSModalUpdateView):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class SubcategoryUpdateView(LoginRequiredMixin, UserOwnedSubcategoryMixin, BSModalUpdateView):
     model = Subcategory
     form_class = SubcategoryForm
     template_name = 'dds_app/modals/update_subcategory_modal.html'
     success_url = reverse_lazy('managing_directories')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
-        transactions = Transaction.objects.filter(subcategory=self.object)
+        transactions = Transaction.objects.filter(owner=self.request.user, subcategory=self.object)
         for transaction in transactions:
             transaction.category = self.object.category
         Transaction.objects.bulk_update(transactions, ['category'])
@@ -203,18 +290,18 @@ class SubcategoryUpdateView(BSModalUpdateView):
         
         return response
 
-class SubcategoryDeleteView(BSModalDeleteView):
+class SubcategoryDeleteView(LoginRequiredMixin, UserOwnedSubcategoryMixin, ProtectedDeleteMixin, BSModalDeleteView):
     model = Subcategory
     template_name = 'dds_app/modals/delete_subcategory_modal.html'
     success_message = 'Подкатегория успешно удалена'
     success_url = reverse_lazy('managing_directories')
 
-class ManagingDirectories(View):
+class ManagingDirectories(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        status = Status.objects.all().order_by('-pk')
-        operations_types = OperationType.objects.values('pk', 'name').order_by('-pk')
-        categories = Category.objects.values('pk', 'name').order_by('-pk')
-        subcategories = Subcategory.objects.values('pk', 'name').order_by('-pk')
+        status = Status.objects.filter(owner=request.user).order_by('-pk')
+        operations_types = OperationType.objects.filter(owner=request.user).values('pk', 'name').order_by('-pk')
+        categories = Category.objects.filter(owner=request.user).values('pk', 'name').order_by('-pk')
+        subcategories = Subcategory.objects.filter(category__owner=request.user).values('pk', 'name').order_by('-pk')
 
         context = {
             'status': status,

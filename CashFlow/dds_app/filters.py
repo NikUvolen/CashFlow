@@ -67,5 +67,7 @@ class TransactionFilter(FilterSet):
         super().__init__(*args, **kwargs)
 
         if owner:
-            self.filters['subcategory'].queryset = Subcategory.objects.values_list('name', flat=True)
-            self.filters['category'].queryset = Category.objects.values_list('name', flat=True)
+            self.filters['status'].queryset = Status.objects.filter(owner=owner)
+            self.filters['operation_type'].queryset = OperationType.objects.filter(owner=owner)
+            self.filters['subcategory'].queryset = Subcategory.objects.filter(category__owner=owner)
+            self.filters['category'].queryset = Category.objects.filter(owner=owner)
